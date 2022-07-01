@@ -1,6 +1,9 @@
 #include "main.h"
 #include <string>
 #include <sys/types.h>
+#include <cstdlib>
+#include <cmath>
+
 
 
 //import string type
@@ -79,6 +82,28 @@ void autonomous() {}
 
 
 
+double distanceFromObject(pros::vision_object_s_t obj){
+	const double GOAL_SIZE = 16;
+	
+	double width = (double)obj.width;
+	
+	//35 degrees is a guess of camera view arc angle 
+	double angle = 35 * (width / 316.0);
+
+	//calculate width of an individual pixel in inches
+	double widthOfPixel = GOAL_SIZE / width;
+
+	//split triangle in half and calculate angles 
+	//law of sines
+	double half_angle = angle/2.0; 
+	double right_side_angle = 180.0 - 90 - angle/2.0;
+
+	//finalized distance from goal in pixel-lengths 
+	double distanceInPixels = sin(right_side_angle)/(sin(half_angle)/width);
+	
+	return distanceInPixels * widthOfPixel;
+}
+
 
 /**
  * Runs the operator control code. This function will be started in its own task
@@ -117,12 +142,10 @@ void opcontrol() {
 		visionSensor.read_by_sig(0,1,10,blueArr);
 		pros::vision_object_s_t largestBlue = blueArr[0];
 		//generate blue data string:
-		string blueData = "BLUE w: " + std::to_string(largestBlue.width) + "; h: " + std::to_string(largestBlue.height) + "; s: " + std::to_string(largestBlue.signature);
+		string blueData = "BLUE w: " + std::to_string(largestBlue.width) + "; h: " + std::to_string(largestBlue.height) + "; a: " + std::to_string(largestBlue.angle);
 		//print data:
 		printLine(blueData);
-
-
-
+		printLine("BLUE distance: " + std::to_string(distanceFromObject(largestBlue)));
 
 
 
@@ -130,9 +153,10 @@ void opcontrol() {
 		visionSensor.read_by_sig(0,2,10,redArr);
 		pros::vision_object_s_t largestRed = redArr[0];
 		//generate red data string:
-		string redData = "RED w: " + std::to_string(largestRed.width) + "; h: " + std::to_string(largestRed.height) + "; s: " + std::to_string(largestRed.signature);
+		string redData = "RED w: " + std::to_string(largestRed.width) + "; h: " + std::to_string(largestRed.height) + "; a: " + std::to_string(largestRed.angle);
 		//print data:
 		printLine(redData);
+		printLine("RED distance: " + std::to_string(distanceFromObject(largestRed)));
 
 		pros::delay(10);
 
