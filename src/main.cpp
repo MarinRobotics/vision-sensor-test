@@ -109,19 +109,25 @@ void opcontrol() {
 	visionSensor.set_signature(2, &RED_GOAL);
 
 	//create arrays for the objects
-	pros::vision_object_s_t blueArr[1];
-	pros::vision_object_s_t redArr[1];
+	pros::vision_object_s_t blueArr[10];
+	pros::vision_object_s_t redArr[10];
 
 	while (true) {
 		//get largest blue object by signature:
-		visionSensor.read_by_sig(0,1,1,blueArr);
+		visionSensor.read_by_sig(0,1,10,blueArr);
 		pros::vision_object_s_t largestBlue = blueArr[0];
 		//generate blue data string:
 		string blueData = "BLUE w: " + std::to_string(largestBlue.width) + "; h: " + std::to_string(largestBlue.height) + "; s: " + std::to_string(largestBlue.signature);
 		//print data:
 		printLine(blueData);
+
+
+
+
+
+
 		//get largest red object by signature:
-		visionSensor.read_by_sig(0,2,1,redArr);
+		visionSensor.read_by_sig(0,2,10,redArr);
 		pros::vision_object_s_t largestRed = redArr[0];
 		//generate red data string:
 		string redData = "RED w: " + std::to_string(largestRed.width) + "; h: " + std::to_string(largestRed.height) + "; s: " + std::to_string(largestRed.signature);
